@@ -44,7 +44,21 @@ exports.handler = async (event) => {
     const mainSha = mainBranch.data.object.sha;
 
     // 5. Buat nama branch baru yang unik untuk usulan ini
-    const newBranchName = `usulan/${bahasa.toLowerCase()}-${kata.toLowerCase()}-${Date.now()}`;
+    // --- PERBAIKAN DIMULAI DISINI ---
+    // SANITASI: Nama branch Git tidak boleh mengandung spasi atau karakter aneh.
+    // Kita ganti spasi dengan '-' dan hapus karakter selain huruf/angka/strip
+    const safeBahasa = bahasa
+      .toLowerCase()
+      .replace(/\s+/g, "-") // Ganti spasi (atau lebih) dengan 1 strip
+      .replace(/[^a-z0-9-]/g, ""); // Hapus semua yg bukan huruf, angka, atau strip
+
+    const safeKata = kata
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
+    const newBranchName = `usulan/${safeBahasa}-${safeKata}-${Date.now()}`;
+    // --- PERBAIKAN SELESAI ---
 
     // 6. Buat branch baru dari 'main'
     await octokit.rest.git.createRef({
