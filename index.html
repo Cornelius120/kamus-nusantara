@@ -386,9 +386,11 @@
 
     <script>
       // GANTI DENGAN URL RAW GITHUB KAMU (dari repo public)
-      const GITHUB_RAW_URL_DB = "URL_RAW_DATABASE_JSON_KAMU";
+      const GITHUB_RAW_URL_DB =
+        "https://raw.githubusercontent.com/Cornelius120/kamus-nusantara/main/database.json";
       // URL file languages.json BARU kamu
-      const GITHUB_RAW_URL_LANG = "URL_RAW_LANGUAGES_JSON_KAMU";
+      const GITHUB_RAW_URL_LANG =
+        "https://raw.githubusercontent.com/Cornelius120/kamus-nusantara/main/languages.json";
 
       let allWords = [];
       let allLanguages = [];
@@ -415,14 +417,26 @@
             fetch(GITHUB_RAW_URL_DB + "?cache=" + new Date().getTime()),
           ]);
 
+          if (!langResponse.ok) {
+            throw new Error(
+              `Gagal memuat languages.json: ${langResponse.statusText}`
+            );
+          }
+          if (!dbResponse.ok) {
+            throw new Error(
+              `Gagal memuat database.json: ${dbResponse.statusText}`
+            );
+          }
+
           allLanguages = await langResponse.json();
           allWords = await dbResponse.json();
 
           renderHomePage();
         } catch (error) {
           console.error("Gagal mengambil data:", error);
-          document.getElementById("page-home").innerHTML =
-            '<p style="text-align:center;">Gagal memuat data. Coba refresh halaman.</p>';
+          document.getElementById(
+            "page-home"
+          ).innerHTML = `<p style="text-align:center; color: #ef4444;">Error: ${error.message}<br>Coba refresh halaman. Pastikan file 'database.json' ada di repo.</p>`;
         } finally {
           document.getElementById("loader-home").style.display = "none";
         }
