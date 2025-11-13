@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kamus Nusantara Open Source</title>
+    <style>
+      :root {
+        --primary-bg: #0f172a;
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --text-main: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --accent: #38bdf8;
+        --border: rgba(255, 255, 255, 0.1);
+        --success: #10b981;
+      }
+      body {
+        background-color: var(--primary-bg);
+        color: var(--text-main);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      main {
+        width: 100%;
+        max-width: 1100px;
+      }
+      h1,
+      h2 {
+        font-weight: 800;
+        text-align: center;
+        background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-size: 2.5rem;
+      }
+      h2 {
+        font-size: 2rem;
+        margin-top: 50px;
+      }
+
+      /* Sembunyikan halaman yang tidak aktif */
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* Tombol Navigasi */
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn:hover {
+        background: var(--accent);
+        color: #000;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #000;
+      }
+      .btn-primary:hover {
+        background: #60cff9;
+      }
+
+      /* 1. HALAMAN HOME (PILIH BAHASA) */
+      #language-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+      }
+      .lang-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .lang-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      }
+      .lang-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--border);
+      }
+      .lang-card-content {
+        padding: 20px;
+      }
+      .lang-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .lang-card-origin {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 5px;
+        font-style: italic;
+      }
+      .lang-card-desc {
+        font-size: 1rem;
+        color: var(--text-main);
+        margin-top: 15px;
+        line-height: 1.6;
+      }
+
+      /* 2. HALAMAN KAMUS */
+      .kamus-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+      .filter-btn {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+      .filter-btn:hover,
+      .filter-btn.active {
+        background: var(--accent);
+        color: #000;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+      }
+
+      #dictionary-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        width: 100%;
+      }
+      .word-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: 15px;
+      }
+      .word-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--accent);
+        margin-bottom: 5px;
+      }
+      .word-lang {
+        display: none;
+      } /* Kita sudah tahu bahasanya, jadi sembunyikan */
+      .word-mean {
+        line-height: 1.6;
+        color: var(--text-secondary);
+      }
+
+      .contribution-cta {
+        background: var(--card-bg);
+        border: 1px dashed var(--border);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin-top: 40px;
+      }
+      .contribution-cta p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin: 0 0 20px 0;
+      }
+
+      /* 3. HALAMAN SUBMIT */
+      .submit-form {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 600px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin: 30px auto;
+        backdrop-filter: blur(10px);
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+      .form-group input,
+      .form-group textarea {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .form-group input:read-only {
+        background: rgba(0, 0, 0, 0.4);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+      }
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+      .submit-btn {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 15px;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .submit-btn:hover {
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        transform: translateY(-2px);
+      }
+      .submit-btn:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+      }
+      #form-message {
+        text-align: center;
+        font-weight: 600;
+        padding: 10px;
+        border-radius: 8px;
+        display: none;
+      }
+      #form-message.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+      }
+      #form-message.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      /* Loader */
+      .loader {
+        border: 4px solid var(--card-bg);
+        border-top: 4px solid var(--accent);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 50px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ================= HALAMAN 1: HOME ================= -->
+      <div id="page-home" class="page active">
+        <h1>Kamus Nusantara</h1>
+        <p
+          style="
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-top: -15px;
+            margin-bottom: 30px;
+          "
+        >
+          Pilih bahasa daerah yang ingin kamu jelajahi.
+        </p>
+        <div id="loader-home" class="loader"></div>
+        <div id="language-grid">
+          <!-- Kartu Bahasa akan di-generate oleh JS -->
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN 2: KAMUS ================= -->
+      <div id="page-kamus" class="page">
+        <div class="kamus-header">
+          <button class="btn" onclick="showPage('page-home')">
+            ← Kembali ke Daftar Bahasa
+          </button>
+          <h2 id="kamus-title" style="margin: 0">Kamus Bahasa...</h2>
+        </div>
+
+        <div class="filter-container" id="alphabet-filters">
+          <button class="filter-btn active" onclick="filterWords('ALL')">
+            SEMUA
+          </button>
+          <!-- Huruf A-Z akan di-generate via JS -->
+        </div>
+
+        <div id="loader-kamus" class="loader" style="display: none"></div>
+        <div id="dictionary-list"></div>
+
+        <!-- Tombol CTA (Call to Action) Sesuai Permintaan Kamu -->
+        <div class="contribution-cta">
+          <p id="contribution-text">
+            Menemukan kata yang salah atau ingin menambah kata baru di bahasa
+            ini?
+          </p>
+          <button class="btn btn-primary" onclick="showPage('page-submit')">
+            Beri Kontribusi
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN 3: SUBMIT ================= -->
+      <div id="page-submit" class="page">
+        <button class="btn" onclick="showPage('page-kamus')">
+          ← Kembali ke Kamus
+        </button>
+        <h2 id="submit-title">Usulkan Kata Baru</h2>
+
+        <form class="submit-form" id="submission-form">
+          <div class="form-group">
+            <label for="bahasa">Bahasa Daerah</label>
+            <input type="text" id="bahasa" name="bahasa" required readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="kata">Kata (Dalam Bahasa Daerah)</label>
+            <input type="text" id="kata" name="kata" required />
+          </div>
+
+          <div class="form-group">
+            <label for="arti">Arti (Dalam Bahasa Indonesia)</label>
+            <textarea id="arti" name="arti" required></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submit-button">
+            Kirim Usulan
+          </button>
+          <div id="form-message"></div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // GANTI DENGAN URL RAW GITHUB KAMU (dari repo public)
+      const GITHUB_RAW_URL_DB = "URL_RAW_DATABASE_JSON_KAMU";
+      // URL file languages.json BARU kamu
+      const GITHUB_RAW_URL_LANG = "URL_RAW_LANGUAGES_JSON_KAMU";
+
+      let allWords = [];
+      let allLanguages = [];
+      let currentLanguage = { id: "", nama: "" };
+
+      // 1. Inisialisasi Aplikasi
+      document.addEventListener("DOMContentLoaded", () => {
+        initApp();
+        generateAlphabetButtons();
+        setupFormListener();
+      });
+
+      function initApp() {
+        showPage("page-home");
+        fetchData();
+      }
+
+      async function fetchData() {
+        document.getElementById("loader-home").style.display = "block";
+        try {
+          // Ambil kedua file JSON secara bersamaan
+          const [langResponse, dbResponse] = await Promise.all([
+            fetch(GITHUB_RAW_URL_LANG + "?cache=" + new Date().getTime()),
+            fetch(GITHUB_RAW_URL_DB + "?cache=" + new Date().getTime()),
+          ]);
+
+          allLanguages = await langResponse.json();
+          allWords = await dbResponse.json();
+
+          renderHomePage();
+        } catch (error) {
+          console.error("Gagal mengambil data:", error);
+          document.getElementById("page-home").innerHTML =
+            '<p style="text-align:center;">Gagal memuat data. Coba refresh halaman.</p>';
+        } finally {
+          document.getElementById("loader-home").style.display = "none";
+        }
+      }
+
+      // 2. Logika Navigasi Halaman
+      function showPage(pageId, langId = null) {
+        document
+          .querySelectorAll(".page")
+          .forEach((page) => page.classList.remove("active"));
+        document.getElementById(pageId).classList.add("active");
+        window.scrollTo(0, 0);
+
+        if (pageId === "page-kamus" && langId) {
+          renderKamusPage(langId);
+        }
+        if (pageId === "page-submit") {
+          renderSubmitPage();
+        }
+        if (pageId === "page-home") {
+          currentLanguage = { id: "", nama: "" };
+        }
+      }
+
+      // 3. Render Halaman
+      function renderHomePage() {
+        const grid = document.getElementById("language-grid");
+        grid.innerHTML = "";
+        allLanguages.forEach((lang) => {
+          const card = document.createElement("div");
+          card.className = "lang-card";
+          card.onclick = () => showPage("page-kamus", lang.id);
+          card.innerHTML = `
+                    <img src="${lang.img}" alt="${lang.nama}" onerror="this.src='https://placehold.co/600x400/0f172a/38bdf8?text=${lang.id}'">
+                    <div class="lang-card-content">
+                        <div class="lang-card-title">${lang.nama}</div>
+                        <div class="lang-card-origin">${lang.asal}</div>
+                        <div class="lang-card-desc">${lang.deskripsi}</div>
+                    </div>
+                `;
+          grid.appendChild(card);
+        });
+      }
+
+      function renderKamusPage(langId) {
+        const langData = allLanguages.find((l) => l.id === langId);
+        if (!langData) return;
+
+        currentLanguage = langData;
+
+        document.getElementById(
+          "kamus-title"
+        ).innerText = `Kamus ${langData.nama}`;
+        document.getElementById(
+          "contribution-text"
+        ).innerText = `Menemukan kata yang salah atau ingin menambah kata baru di ${langData.nama}?`;
+
+        // Reset filter A-Z
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.querySelector(".filter-btn").classList.add("active");
+
+        filterWords("ALL");
+      }
+
+      function renderSubmitPage() {
+        // Pre-fill form dengan bahasa yang sedang aktif
+        document.getElementById("bahasa").value = currentLanguage.nama;
+        document.getElementById(
+          "submit-title"
+        ).innerText = `Usulkan Kata (Bahasa ${currentLanguage.nama})`;
+
+        // Reset form
+        document.getElementById("submission-form").reset();
+        document.getElementById("bahasa").value = currentLanguage.nama; // reset() menghapus ini, jadi set lagi
+        document.getElementById("form-message").style.display = "none";
+      }
+
+      // 4. Logika Kamus & Filter
+      function generateAlphabetButtons() {
+        const alphabetContainer = document.getElementById("alphabet-filters");
+        const alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        alphabets.forEach((letter) => {
+          const btn = document.createElement("button");
+          btn.innerText = letter;
+          btn.className = "filter-btn";
+          btn.onclick = () => filterWords(letter);
+          alphabetContainer.appendChild(btn);
+        });
+      }
+
+      function filterWords(letter) {
+        // Aktifkan tombol
+        if (event) {
+          document
+            .querySelectorAll(".filter-btn")
+            .forEach((btn) => btn.classList.remove("active"));
+          event.target.classList.add("active");
+        }
+
+        // Filter berdasarkan bahasa yang AKTIF
+        let filtered = allWords.filter(
+          (item) =>
+            item.bahasa.toLowerCase() === currentLanguage.nama.toLowerCase()
+        );
+
+        // Filter berdasarkan huruf
+        if (letter !== "ALL") {
+          filtered = filtered.filter((item) =>
+            item.kata.toUpperCase().startsWith(letter)
+          );
+        }
+
+        // Urutkan A-Z
+        filtered.sort((a, b) => a.kata.localeCompare(b.kata));
+
+        displayWords(filtered);
+      }
+
+      function displayWords(data) {
+        const listContainer = document.getElementById("dictionary-list");
+        listContainer.innerHTML = "";
+
+        if (data.length === 0) {
+          listContainer.innerHTML =
+            '<p style="text-align:center; width:100%;">Tidak ada kata ditemukan.</p>';
+          return;
+        }
+
+        data.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "word-card";
+          card.innerHTML = `
+                    <div class="word-title">${item.kata}</div>
+                    <div class="word-mean">${item.arti}</div>
+                `;
+          listContainer.appendChild(card);
+        });
+      }
+
+      // 5. Logika Form Submit (Tidak berubah, hanya beda nama fungsi setup)
+      function setupFormListener() {
+        const form = document.getElementById("submission-form");
+        const submitButton = document.getElementById("submit-button");
+        const formMessage = document.getElementById("form-message");
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          submitButton.disabled = true;
+          submitButton.innerText = "Mengirim...";
+          formMessage.style.display = "none";
+
+          const formData = {
+            kata: document.getElementById("kata").value,
+            bahasa: document.getElementById("bahasa").value, // Ini sudah terisi otomatis
+            arti: document.getElementById("arti").value,
+          };
+
+          try {
+            const response = await fetch("/.netlify/functions/submit-word", {
+              method: "POST",
+              body: JSON.stringify(formData),
+              headers: { "Content-Type": "application/json" },
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+              formMessage.innerText =
+                "Sukses! Usulan kamu telah dikirim (PR Dibuat) dan menunggu moderasi.";
+              formMessage.className = "success";
+              form.reset();
+              // Set ulang bahasa setelah reset
+              document.getElementById("bahasa").value = currentLanguage.nama;
+            } else {
+              throw new Error(result.message || "Gagal mengirim usulan.");
+            }
+          } catch (error) {
+            formMessage.innerText = `Error: ${error.message}`;
+            formMessage.className = "error";
+          } finally {
+            formMessage.style.display = "block";
+            submitButton.disabled = false;
+            submitButton.innerText = "Kirim Usulan";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

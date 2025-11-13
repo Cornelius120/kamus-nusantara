@@ -1,0 +1,30 @@
+[
+  {
+    "id": "karo",
+    "nama": "Bahasa Karo",
+    "asal": "Sumatera Utara",
+    "deskripsi": "Bahasa yang dituturkan oleh Suku Karo, mayoritas di Dataran Tinggi Karo, Medan, Deli Serdang, dan sekitarnya.",
+    "img": "https://placehold.co/600x400/0f172a/38bdf8?text=KARO"
+  },
+  {
+    "id": "jawa",
+    "nama": "Bahasa Jawa",
+    "asal": "Jawa Tengah, DIY, Jawa Timur",
+    "deskripsi": "Bahasa dengan penutur terbanyak di Indonesia, memiliki beberapa tingkatan tutur (Ngoko, Krama).",
+    "img": "https://placehold.co/600x400/0f172a/38bdf8?text=JAWA"
+  },
+  {
+    "id": "sunda",
+    "nama": "Bahasa Sunda",
+    "asal": "Jawa Barat & Banten",
+    "deskripsi": "Bahasa yang dituturkan oleh Suku Sunda, dikenal dengan logatnya yang khas dan lembut.",
+    "img": "https://placehold.co/600x400/0f172a/38bdf8?text=SUNDA"
+  },
+  {
+    "id": "minang",
+    "nama": "Bahasa Minang",
+    "asal": "Sumatera Barat",
+    "deskripsi": "Dikenal juga sebagai Bahasa Minangkabau, digunakan oleh orang Minang di Sumatera Barat dan perantauan.",
+    "img": "https://placehold.co/600x400/0f172a/38bdf8?text=MINANG"
+  }
+]

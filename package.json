@@ -1,0 +1,10 @@
+{
+  "name": "kamus-nusantara-backend",
+  "version": "1.0.0",
+  "description": "Backend function untuk submit kata ke GitHub repo",
+  "main": "netlify/functions/submit-word.js",
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",
+    "node-fetch": "^2.6.1"
+  }
+}
